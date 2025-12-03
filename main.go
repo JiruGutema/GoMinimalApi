@@ -2,8 +2,14 @@ package main
 
 import (
 	"fmt"
+	"gominimalapi/routes"
+
 )
 
+
 func main() {
-	fmt.Println("Hello, World!")
+	//run the server
+	routes.Router()
+	string := fmt.Sprintf("Server is running on port: %s!", "8080")
+	fmt.Println(string)
 }
