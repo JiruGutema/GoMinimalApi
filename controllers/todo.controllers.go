@@ -1,17 +1,52 @@
-//Package controllers handles http requrest for me
+// Package controllers handles http requrest for me
 package controllers
 
 import (
-
 	"fmt"
 	"strconv"
-	"gominimalapi/data"
-	"gominimalapi/models"
+
 	"github.com/gin-gonic/gin"
+	"github.com/jirugutema/gominimalapi/config"
+	"github.com/jirugutema/gominimalapi/data"
+	"github.com/jirugutema/gominimalapi/models"
 )
 
 func GetAllTasks(context *gin.Context) {
-	context.JSON(200, data.Tasks)
+	query := "SELECT id, name, isCompleted FROM todo"
+	rows, err := config.DB.Query(query)
+	if err != nil {
+		context.JSON(400, gin.H{
+			"success": false,
+			"message": "error in reading the database",
+		})
+	}
+
+	defer rows.Close()
+	var results []models.Task
+	for rows.Next() {
+		var id int
+		var name string
+		var isCompleted bool
+
+		err := rows.Scan(&id, &name, &isCompleted)
+		if err != nil {
+
+			context.JSON(400, gin.H{
+				"success": false,
+				"message": "error in reading the database",
+			})
+			return
+
+		}
+		newTask := models.Task{
+			ID:          id,
+			Name:        name,
+			IsCompleted: isCompleted,
+		}
+		results = append(results, newTask)
+	}
+
+	context.JSON(200, results)
 }
 
 func CreateTask(context *gin.Context) {
@@ -22,15 +57,17 @@ func CreateTask(context *gin.Context) {
 		return
 	}
 
-	// check if the task is already exist
-	for i := 0; i < len(data.Tasks); i++ {
-		if data.Tasks[i].Name == NewTask.Name {
-			context.JSON(400, "Task already exists")
-			return
-		}
+	query := "INSERT INTO todo (ID, name, isCompleted) VALUES ($1, $2, $3) RETURNING id"
+	row := config.DB.QueryRow(query, NewTask.ID, NewTask.Name, NewTask.IsCompleted)
+	e := row.Scan(&NewTask.ID)
+	if e != nil {
+		context.JSON(200, gin.H{
+			"success": false,
+			"message": "can't create a specified task",
+		})
+		return
 	}
 
-	fmt.Println("New Task to be added:", NewTask)
 	data.Tasks = append(data.Tasks, NewTask)
 	context.JSON(201, data.Tasks)
 }
@@ -40,7 +77,6 @@ func DeleteTask(context *gin.Context) {
 	if err != nil {
 		context.JSON(400, "Invalid task ID")
 	}
-
 
 	idx := -1
 	count := 0
@@ -58,8 +94,4 @@ func DeleteTask(context *gin.Context) {
 
 	data.Tasks = append(data.Tasks[:idx], data.Tasks[idx+1:]...)
 	context.JSON(200, data.Tasks)
-}
-
-func GetHealthStatus(context *gin.Context) {
-	context.JSON(200, "The server is up and running")
 }
