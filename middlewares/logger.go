@@ -14,5 +14,5 @@ func Logger(context *gin.Context){
 	fmt.Println("Request Content Length:", context.Request.ContentLength)
 	fmt.Println("Request Transfer Encoding:", context.Request.TransferEncoding)
 	fmt.Println("Request Proto:", context.Request.Proto)
-
 }
+

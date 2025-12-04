@@ -1,7 +1,7 @@
 package data
 
 import (
-	"gominimalapi/models"
+	"github.com/jirugutema/gominimalapi/models"
 )
 
 var Users = []models.User{

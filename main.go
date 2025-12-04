@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
-	"gominimalapi/routes"
 
+	"github.com/jirugutema/gominimalapi/config"
+	"github.com/jirugutema/gominimalapi/routes"
 )
 
-
 func main() {
-	//run the server
+	// run the server
+	config.ConnectDatabase()
 	routes.Router()
 	string := fmt.Sprintf("Server is running on port: %s!", "8080")
 	fmt.Println(string)

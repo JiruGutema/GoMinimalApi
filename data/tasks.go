@@ -2,7 +2,7 @@
 package data
 
 import (
-	"gominimalapi/models"
+	"github.com/jirugutema/gominimalapi/models"
 )
 //Tasks is the lists of the books
 var Tasks = []models.Task {

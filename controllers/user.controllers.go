@@ -1,10 +1,12 @@
 package controllers
 
 import (
+	"fmt"
 	"strconv"
 
-	"gominimalapi/data"
-	"gominimalapi/models"
+	"github.com/jirugutema/gominimalapi/data"
+	"github.com/jirugutema/gominimalapi/dto"
+	"github.com/jirugutema/gominimalapi/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -53,6 +55,7 @@ func DeleteUser(context *gin.Context) {
 			exists = true
 			break
 		}
+		idx++
 	}
 
 	if !exists {
@@ -79,6 +82,29 @@ func GetUser(context *gin.Context) {
 		if data.Users[i].ID == id {
 			user = data.Users[id]
 		}
+		i++
 	}
 	context.JSON(200, user)
+}
+
+func LoginHandler(context *gin.Context) {
+	var login dto.Login
+
+	err := context.BindJSON(&login)
+	if err != nil {
+		context.JSON(400, "error getting login information")
+		return
+	}
+
+	fmt.Printf("Type: %T\n", login.ID)
+	length := len(data.Users)
+	idx := 0
+	for idx < length {
+		if data.Users[idx].Username == login.Username && data.Users[idx].ID == login.ID {
+			context.JSON(200, gin.H{"logged": "success", "token": "fake_token"})
+			return
+		}
+		idx++
+	}
+	context.JSON(404, "Invalid Username or ID")
 }
